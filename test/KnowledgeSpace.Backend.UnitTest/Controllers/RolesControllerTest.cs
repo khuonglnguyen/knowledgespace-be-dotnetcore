@@ -43,5 +43,21 @@ namespace KnowledgeSpace.Backend.UnitTest.Controllers
             Assert.NotNull(rolesControler);
             Assert.IsType<CreatedAtActionResult>(result);
         }
+
+        [Fact]
+        public async Task PostRole_ValidInput_Failed()
+        {
+            _mockRoleManager.Setup(x => x.CreateAsync(It.IsAny<IdentityRole>())).ReturnsAsync(IdentityResult.Failed(new IdentityError[] { }));
+            var rolesControler = new RolesController(_mockRoleManager.Object);
+
+            var result = await rolesControler.PostRole(new RoleVm()
+            {
+                Id = "test",
+                Name = "test",
+            });
+
+            Assert.NotNull(rolesControler);
+            Assert.IsType<BadRequestObjectResult>(result);
+        }
     }
 }
