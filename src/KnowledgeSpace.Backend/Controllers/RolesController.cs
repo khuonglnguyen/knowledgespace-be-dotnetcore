@@ -43,13 +43,14 @@ namespace KnowledgeSpace.Backend.Controllers
         [HttpGet]
         public async Task<IActionResult> GetRoles()
         {
-            var roles = await _roleManager.Roles.Select(role => new RoleVm()
+            var roles = await _roleManager.Roles.ToListAsync();
+            var rolevms = roles.Select(role => new RoleVm()
             {
                 Id = role.Id,
                 Name = role.Name
-            }).ToListAsync();
+            });
 
-            return Ok(roles);
+            return Ok(rolevms);
         }
 
         [HttpGet]

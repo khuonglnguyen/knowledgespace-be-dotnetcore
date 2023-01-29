@@ -1,10 +1,12 @@
 ﻿using KnowledgeSpace.Backend.Controllers;
+using KnowledgeSpace.Backend.UnitTest.Extensions;
 using KnowledgeSpace.ViewModels.Systems;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
@@ -61,19 +63,30 @@ namespace KnowledgeSpace.Backend.UnitTest.Controllers
         }
 
         [Fact]
-        public async Task GetRole_ValidInput_Success()
+        public async Task GetRole_HasData_ReturnSuccess()
         {
-            _mockRoleManager.Setup(x => x.CreateAsync(It.IsAny<IdentityRole>())).ReturnsAsync(IdentityResult.Success);
+            var roles = new List<IdentityRole>()
+            {
+                 new IdentityRole("test1"),
+                new IdentityRole("test2"),
+            }.AsAsyncQueryable();
+            _mockRoleManager.Setup(x => x.Roles).Returns(roles);
             var rolesControler = new RolesController(_mockRoleManager.Object);
 
-            var result = await rolesControler.PostRole(new RoleVm()
-            {
-                Id = "test",
-                Name = "test",
-            });
+            var result = await rolesControler.GetRoles();
 
-            Assert.NotNull(rolesControler);
-            Assert.IsType<CreatedAtActionResult>(result);
+            var okResult = result as OkObjectResult;
+            var roleVms=okResult.Value as IEnumerable<RoleVm>;
+            Assert.True(roleVms.Count() > 0);
+        }
+
+        [Fact]
+        public async Task GetRole_ThrowException_Failed()
+        {
+            _mockRoleManager.Setup(x => x.Roles).Throws<ArgumentException>();
+            var rolesControler = new RolesController(_mockRoleManager.Object);
+
+            await Assert.ThrowsAnyAsync<Exception>(async () => await rolesControler.GetRoles());
         }
     }
 }
