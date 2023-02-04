@@ -129,5 +129,30 @@ namespace KnowledgeSpace.Backend.UnitTest.Controllers
 
             await Assert.ThrowsAnyAsync<Exception>(async () => await rolesControler.GetRolesPaging(null, 1, 2));
         }
+
+        [Fact]
+        public async Task GetById_HasData_ReturnSuccess()
+        {
+            _mockRoleManager.Setup(x => x.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new IdentityRole()
+            {
+                Id = "test1",
+                Name = "test1"
+            });
+            var rolesControler = new RolesController(_mockRoleManager.Object);
+            var result = await rolesControler.GetById("test1");
+            var okResult = result as OkObjectResult;
+            var roleVm = okResult.Value as RoleVm;
+
+            Assert.Equal("test1", roleVm.Name);
+        }
+
+        [Fact]
+        public async Task GetById_ThrowException_Failed()
+        {
+            _mockRoleManager.Setup(x => x.FindByIdAsync(It.IsAny<string>())).Throws<Exception>();
+            var rolesControler = new RolesController(_mockRoleManager.Object);
+
+            await Assert.ThrowsAnyAsync<Exception>(async () => await rolesControler.GetById("test1"));
+        }
     }
 }
