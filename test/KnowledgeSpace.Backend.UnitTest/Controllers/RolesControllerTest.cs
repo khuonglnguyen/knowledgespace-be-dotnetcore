@@ -51,7 +51,7 @@ namespace KnowledgeSpace.Backend.UnitTest.Controllers
                 Name = "test",
             });
 
-            Assert.NotNull(rolesControler);
+            Assert.NotNull(result);
             Assert.IsType<CreatedAtActionResult>(result);
         }
 
@@ -67,7 +67,7 @@ namespace KnowledgeSpace.Backend.UnitTest.Controllers
                 Name = "test",
             });
 
-            Assert.NotNull(rolesControler);
+            Assert.NotNull(result);
             Assert.IsType<BadRequestObjectResult>(result);
         }
 
@@ -153,6 +153,50 @@ namespace KnowledgeSpace.Backend.UnitTest.Controllers
             var rolesControler = new RolesController(_mockRoleManager.Object);
 
             await Assert.ThrowsAnyAsync<Exception>(async () => await rolesControler.GetById("test1"));
+        }
+
+        [Fact]
+        public async Task PutRole_ValidInput_Success()
+        {
+            _mockRoleManager.Setup(x => x.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new IdentityRole()
+            {
+                Name = "test",
+                Id = "test"
+            });
+
+            _mockRoleManager.Setup(x => x.UpdateAsync(It.IsAny<IdentityRole>())).ReturnsAsync(IdentityResult.Success);
+            var rolesControler = new RolesController(_mockRoleManager.Object);
+
+            var result = await rolesControler.PutRole("test", new RoleVm()
+            {
+                Id = "test",
+                Name = "test",
+            });
+
+            Assert.NotNull(result);
+            Assert.IsType<NoContentResult>(result);
+        }
+
+        [Fact]
+        public async Task PutRole_ValidInput_Failed()
+        {
+            _mockRoleManager.Setup(x => x.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new IdentityRole()
+            {
+                Name = "test",
+                Id = "test"
+            });
+
+            _mockRoleManager.Setup(x => x.UpdateAsync(It.IsAny<IdentityRole>())).ReturnsAsync(IdentityResult.Failed(new IdentityError[] { }));
+            var rolesControler = new RolesController(_mockRoleManager.Object);
+
+            var result = await rolesControler.PutRole("test", new RoleVm()
+            {
+                Id = "test",
+                Name = "test",
+            });
+
+            Assert.NotNull(result);
+            Assert.IsType<BadRequestResult>(result);
         }
     }
 }
