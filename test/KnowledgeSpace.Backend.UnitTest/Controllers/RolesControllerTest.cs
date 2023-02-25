@@ -198,5 +198,40 @@ namespace KnowledgeSpace.Backend.UnitTest.Controllers
             Assert.NotNull(result);
             Assert.IsType<BadRequestResult>(result);
         }
+
+        [Fact]
+        public async Task DeleteRole_ValidInput_Success()
+        {
+            _mockRoleManager.Setup(x => x.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new IdentityRole()
+            {
+                Name = "test",
+                Id = "test"
+            });
+
+            _mockRoleManager.Setup(x => x.DeleteAsync(It.IsAny<IdentityRole>())).ReturnsAsync(IdentityResult.Success);
+            var rolesControler = new RolesController(_mockRoleManager.Object);
+
+            var result = await rolesControler.DeleteRole("test");
+
+            Assert.IsType<OkObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task DeleteRole_ValidInput_Failed()
+        {
+            _mockRoleManager.Setup(x => x.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new IdentityRole()
+            {
+                Name = "test",
+                Id = "test"
+            });
+
+            _mockRoleManager.Setup(x => x.DeleteAsync(It.IsAny<IdentityRole>())).ReturnsAsync(IdentityResult.Failed(new IdentityError[] { }));
+            var rolesControler = new RolesController(_mockRoleManager.Object);
+
+            var result = await rolesControler.DeleteRole("test");
+
+            Assert.NotNull(result);
+            Assert.IsType<BadRequestResult>(result);
+        }
     }
 }
