@@ -53,7 +53,7 @@ namespace KnowledgeSpace.Backend.Controllers
             return Ok(rolevms);
         }
 
-        [HttpGet]
+        [HttpGet("filter")]
         public async Task<IActionResult> GetRolesPaging(string filter, int page, int size)
         {
             var query = _roleManager.Roles;
