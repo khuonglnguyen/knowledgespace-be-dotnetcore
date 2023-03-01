@@ -16,6 +16,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.OpenApi.Models;
+using FluentValidation.AspNetCore;
+using KnowledgeSpace.ViewModels.Systems;
 
 namespace KnowledgeSpace.Backend
 {
@@ -54,7 +56,8 @@ namespace KnowledgeSpace.Backend
                 options.User.RequireUniqueEmail = true;
             });
 
-            services.AddControllers();
+            services.AddControllers()
+                .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<RoleVmValidator>());
 
             services.AddTransient<DbInitializer>();
 
