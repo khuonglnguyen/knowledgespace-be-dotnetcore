@@ -15,6 +15,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.OpenApi.Models;
+using FluentValidation.AspNetCore;
+using KnowledgeSpace.ViewModels.Systems;
+using KnowledgeSpace.Backend.IdentityServer;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using KnowledgeSpace.Backend.Services;
 
 namespace KnowledgeSpace.Backend
 {
@@ -38,6 +44,18 @@ namespace KnowledgeSpace.Backend
             services.AddIdentity<User, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDBContext>();
 
+            var builder = services.AddIdentityServer(options =>
+            {
+                options.Events.RaiseErrorEvents = true;
+                options.Events.RaiseInformationEvents = true;
+                options.Events.RaiseFailureEvents = true;
+                options.Events.RaiseSuccessEvents = true;
+            })
+            .AddInMemoryApiResources(Config.Apis)
+            .AddInMemoryClients(Config.Clients)
+            .AddInMemoryIdentityResources(Config.Ids)
+            .AddAspNetIdentity<User>();
+
             services.Configure<IdentityOptions>(options =>
             {
                 // Default Lockout settings.
@@ -53,9 +71,17 @@ namespace KnowledgeSpace.Backend
                 options.User.RequireUniqueEmail = true;
             });
 
-            services.AddControllers();
+            services.AddControllersWithViews()
+                .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<RoleVmValidator>());
 
+            services.AddRazorPages();
             services.AddTransient<DbInitializer>();
+            services.AddTransient<IEmailSender, EmailSenderService>();
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Knowledge Space API", Version = "v1" });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -66,6 +92,12 @@ namespace KnowledgeSpace.Backend
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseStaticFiles();
+
+            app.UseIdentityServer();
+
+            app.UseAuthentication();
+
             app.UseHttpsRedirection();
 
             app.UseRouting();
@@ -74,7 +106,15 @@ namespace KnowledgeSpace.Backend
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapDefaultControllerRoute();
+                endpoints.MapRazorPages();
+            });
+
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Knowledge Space API V1");
             });
         }
     }
