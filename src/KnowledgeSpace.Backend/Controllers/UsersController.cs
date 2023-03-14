@@ -6,16 +6,23 @@ using System.Threading.Tasks;
 using System;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using KnowledgeSpace.Backend.Data;
 
 namespace KnowledgeSpace.Backend.Controllers
 {
     public class UsersController : BaseController
     {
         private readonly UserManager<User> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly ApplicationDBContext _context;
 
-        public UsersController(UserManager<User> userManager)
+        public UsersController(UserManager<User> userManager,
+            RoleManager<IdentityRole> roleManager,
+            ApplicationDBContext context)
         {
             _userManager = userManager;
+            _roleManager = roleManager;
+            _context = context;
         }
 
         [HttpPost]
@@ -159,6 +166,33 @@ namespace KnowledgeSpace.Backend.Controllers
                 return Ok(uservm);
             }
             return BadRequest(result.Errors);
+        }
+
+        [HttpGet("{userId}/menu")]
+        public async Task<IActionResult> GetMenuByUserPermission(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            var roles = await _userManager.GetRolesAsync(user);
+            var query = from f in _context.Functions
+                        join p in _context.Permissions
+                            on f.Id equals p.FunctionId
+                        join r in _roleManager.Roles on p.RoleId equals r.Id
+                        join a in _context.Commands
+                            on p.CommandId equals a.Id
+                        where roles.Contains(r.Name) && a.Id == "VIEW"
+                        select new FunctionVm
+                        {
+                            Id = f.Id,
+                            Name = f.Name,
+                            Url = f.Url,
+                            ParentId = f.ParentId,
+                            SortOrder = f.SortOrder,
+                        };
+            var data = await query.Distinct()
+                .OrderBy(x => x.ParentId)
+                .ThenBy(x => x.SortOrder)
+                .ToListAsync();
+            return Ok(data);
         }
     }
 }
