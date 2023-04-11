@@ -5,6 +5,7 @@ using KnowledgeSpace.Backend.Data.Interfaces;
 
 namespace KnowledgeSpace.Backend.Data.Entities
 {
+
     [Table("Reports")]
     public class Report : IDateTracking
     {
@@ -12,7 +13,7 @@ namespace KnowledgeSpace.Backend.Data.Entities
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        public int? KnowledgeBaseId { get; set; }
+        public int KnowledgeBaseId { get; set; }
 
         [MaxLength(500)]
         public string Content { get; set; }
