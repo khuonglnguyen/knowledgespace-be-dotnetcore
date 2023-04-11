@@ -10,14 +10,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KnowledgeSpace.Backend.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20230116130825_Initital1")]
-    partial class Initital1
+    [Migration("20230411114627_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.3")
+                .HasAnnotation("ProductVersion", "3.1.32")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("Relational:Sequence:.KnowledgeBaseSequence", "'KnowledgeBaseSequence', '', '1', '1', '', '', 'Int64', 'False'")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -70,9 +70,6 @@ namespace KnowledgeSpace.Backend.Data.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("CommentId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
@@ -94,16 +91,11 @@ namespace KnowledgeSpace.Backend.Data.Migrations
                         .HasColumnType("varchar(4)")
                         .HasMaxLength(4);
 
-                    b.Property<int?>("KnowledgeBaseId")
+                    b.Property<int>("KnowledgeBaseId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("LastModifiedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("varchar(10)")
-                        .HasMaxLength(10);
 
                     b.HasKey("Id");
 
@@ -237,9 +229,7 @@ namespace KnowledgeSpace.Backend.Data.Migrations
             modelBuilder.Entity("KnowledgeSpace.Backend.Data.Entities.KnowledgeBase", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
 
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
@@ -363,9 +353,6 @@ namespace KnowledgeSpace.Backend.Data.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("CommentId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(500)")
                         .HasMaxLength(500);
@@ -376,17 +363,13 @@ namespace KnowledgeSpace.Backend.Data.Migrations
                     b.Property<bool>("IsProcessed")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("KnowledgeBaseId")
+                    b.Property<int>("KnowledgeBaseId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("LastModifiedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ReportUserId")
-                        .HasColumnType("varchar(50)")
-                        .HasMaxLength(50);
-
-                    b.Property<string>("Type")
                         .HasColumnType("varchar(50)")
                         .HasMaxLength(50);
 
