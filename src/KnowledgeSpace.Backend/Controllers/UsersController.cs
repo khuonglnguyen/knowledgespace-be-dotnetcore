@@ -7,6 +7,8 @@ using System;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using KnowledgeSpace.Backend.Data;
+using KnowledgeSpace.Backend.Authorization;
+using KnowledgeSpace.Backend.Constants;
 
 namespace KnowledgeSpace.Backend.Controllers
 {
@@ -26,6 +28,7 @@ namespace KnowledgeSpace.Backend.Controllers
         }
 
         [HttpPost]
+        [ClaimRequirement(FunctionCode.SYSTEM_USER, CommandCode.CREATE)]
         public async Task<IActionResult> PostUser(UserCreateRequest request)
         {
             var user = new User()
@@ -50,6 +53,7 @@ namespace KnowledgeSpace.Backend.Controllers
         }
 
         [HttpGet]
+        [ClaimRequirement(FunctionCode.SYSTEM_USER, CommandCode.VIEW)]
         public async Task<IActionResult> GetUsers()
         {
             var users = _userManager.Users;
@@ -69,6 +73,7 @@ namespace KnowledgeSpace.Backend.Controllers
         }
 
         [HttpGet("filter")]
+        [ClaimRequirement(FunctionCode.SYSTEM_USER, CommandCode.VIEW)]
         public async Task<IActionResult> GetUsersPaging(string filter, int pageIndex, int pageSize)
         {
             var query = _userManager.Users;
@@ -103,6 +108,7 @@ namespace KnowledgeSpace.Backend.Controllers
 
         //URL: GET: http://localhost:5001/api/users/{id}
         [HttpGet("{id}")]
+        [ClaimRequirement(FunctionCode.SYSTEM_USER, CommandCode.VIEW)]
         public async Task<IActionResult> GetById(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
@@ -123,6 +129,7 @@ namespace KnowledgeSpace.Backend.Controllers
         }
 
         [HttpPut("{id}")]
+        [ClaimRequirement(FunctionCode.SYSTEM_USER, CommandCode.UPDATE)]
         public async Task<IActionResult> PutUser(string id, [FromBody] UserCreateRequest request)
         {
             var user = await _userManager.FindByIdAsync(id);
@@ -142,7 +149,25 @@ namespace KnowledgeSpace.Backend.Controllers
             return BadRequest(result.Errors);
         }
 
+        [HttpPut("{id}/change-password")]
+        [ClaimRequirement(FunctionCode.SYSTEM_USER, CommandCode.UPDATE)]
+        public async Task<IActionResult> PutUserPassword(string id, [FromBody] UserPasswordChangeRequest request)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+                return NotFound();
+
+            var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
+
+            if (result.Succeeded)
+            {
+                return NoContent();
+            }
+            return BadRequest(result.Errors);
+        }
+
         [HttpDelete("{id}")]
+        [ClaimRequirement(FunctionCode.SYSTEM_USER, CommandCode.DELETE)]
         public async Task<IActionResult> DeleteUser(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
